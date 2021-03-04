@@ -17,6 +17,7 @@ DROP DATABASE IF EXISTS employeeManager_db;
 
  CREATE TABLE employee (
    id INT AUTO_INCREMENT PRIMARY KEY,
+   employee_id INT NOT NULL,
    first_name VARCHAR(30) NOT NULL,
    last_name VARCHAR(30) NOT NULL,
    role_id INT NOT NULL,
@@ -60,46 +61,46 @@ DROP DATABASE IF EXISTS employeeManager_db;
      ("Accountant", 61000, 5);
 
  -- Managers
- INSERT INTO employee (first_name, last_name, role_id)
+ INSERT INTO employee (employee_id, first_name, last_name, role_id)
  VALUES 
-     ("Rick", "Bremer", 1),
-     ("Mark", "Wegman", 5),
-     ("Kelly", "Allen", 9),
-     ("Haywood", "Muller", 13),
-     ("Larisa", "Galdamez", 17);
+     (100, "Rick", "Bremer", 1),
+     (101, "Mark", "Wegman", 5),
+     (102, "Kelly", "Allen", 9),
+     (103, "Haywood", "Muller", 13),
+     (104, "Larisa", "Galdamez", 17);
 
- INSERT INTO employee (first_name, last_name, role_id, manager_id)
+ INSERT INTO employee (employee_id, first_name, last_name, role_id, manager_id)
  VALUES
      -- Marketing
-     ("Joseph", "Marquez", 2, 1),
-     ("Michael", "Torres", 3, 1),
-     ("Karl", "Dash", 4, 1),
-     ("Laura", "Stewart", 4, 1),
+     (105, "Joseph", "Marquez", 2, 1),
+     (106, "Michael", "Torres", 3, 1),
+     (107, "Karl", "Dash", 4, 1),
+     (108, "Laura", "Stewart", 4, 1),
 
      -- Sales
-     ("Sheldon", "Casey", 6, 5),
-     ("Larry", "Barber", 6, 5),
-     ("Kevin", "Price", 7, 5),
-     ("Maria", "White", 7, 5),
-     ("Richard", "Briscoe", 7, 5),
-     ("Robert", "Dibble", 8, 5),
+     (109, "Sheldon", "Casey", 6, 5),
+     (110, "Larry", "Barber", 6, 5),
+     (111, "Kevin", "Price", 7, 5),
+     (112, "Maria", "White", 7, 5),
+     (113, "Richard", "Briscoe", 7, 5),
+     (114, "Robert", "Dibble", 8, 5),
 
      -- Operations
-     ("Seth", "Jackson", 10, 9),
-     ("Annie", "England", 11, 9),
-     ("Chastity", "Lyon", 12, 9),
+     (115, "Seth", "Jackson", 10, 9),
+     (116, "Annie", "England", 11, 9),
+     (117, "Chastity", "Lyon", 12, 9),
 
      -- Engineering
-     ("Elanor", "Davis", 14, 13),
-     ("Essie", "Heath", 14, 13),
-     ("Richard", "Brito", 15, 13),
-     ("Dorthy", "Wingert", 15, 13),
-     ("Daniel", "Fisher", 16, 13),
+     (118, "Elanor", "Davis", 14, 13),
+     (119, "Essie", "Heath", 14, 13),
+     (120, "Richard", "Brito", 15, 13),
+     (121, "Dorthy", "Wingert", 15, 13),
+     (122, "Daniel", "Fisher", 16, 13),
 
      -- Finance
-     ("Alexander", "Green", 16, 13),
-     ("Erica", "Christensen", 16, 13),
-     ("Paul", "McKinney", 16, 13);
+     (123, "Alexander", "Green", 16, 13),
+     (124, "Erica", "Christensen", 16, 13),
+     (125, "Paul", "McKinney", 16, 13);
 
  -- SELECT * FROM department;
  -- SELECT * FROM role;
