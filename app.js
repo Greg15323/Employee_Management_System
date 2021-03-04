@@ -2,6 +2,7 @@ var figlet = require('figlet');
 const cTable = require('console.table');
  const inquirer = require("inquirer");
  const mysql = require("mysql");
+ const util = require("util");
 
  var connection = mysql.createConnection({
    host: "localhost",
@@ -45,7 +46,7 @@ const cTable = require('console.table');
          type: "list",
          message: "What would you like to do?",
          choices: [
-           "View all employees",
+           "View all employee data",
            "Add a department, role, or employee",
            "View departments, roles, or employees",
            "Update an employee's role",
@@ -54,7 +55,7 @@ const cTable = require('console.table');
        })
        .then(function(answer) {
          switch (answer.action) {
-         case "View all employees":
+         case "View all employee data":
            allEmployees();
            break;
 
@@ -71,6 +72,14 @@ const cTable = require('console.table');
            break;
 
          case "Exit":
+            figlet('\ Have A Wonderful Day /', function(err, data) {
+                if (err) {
+                    console.log('Something went wrong...');
+                    console.dir(err);
+                    return;
+                }
+                console.log(data)
+            });
            connection.end();
            break;
          }
@@ -79,9 +88,9 @@ const cTable = require('console.table');
 
  //   Function to View All Employees
  function allEmployees() {
-     var query =   `SELECT e.*, r.*, d.*, IFNULL(CONCAT(m.first_name,' ', m.last_name), 'No Manager') AS manager_name
+     var query =   `SELECT r.*, d.*, e.*, IFNULL(CONCAT(m.first_name,' ', m.last_name), 'No Manager') AS manager_name
                      FROM employee AS e
-                     LEFT JOIN employee AS m ON e.manager_id = m.employee_id
+                     LEFT JOIN employee AS m ON e.manager_id = m.id
                      LEFT JOIN role AS r ON e.role_id = r.id 
                      LEFT JOIN department AS d ON r.department_id = d.id`
 
@@ -90,7 +99,7 @@ const cTable = require('console.table');
          if (err) throw err;
 
          for (var i = 0; i < res.length; i++) {
-             var x = [res[i].employee_id, res[i].first_name, res[i].last_name, res[i].title, res[i].salary, res[i].name, res[i].manager_name]
+             var x = [res[i].id, res[i].first_name, res[i].last_name, res[i].title, res[i].salary, res[i].name, res[i].manager_name]
              array.push(x)
              // console.log(res)
          }
@@ -174,6 +183,7 @@ const cTable = require('console.table');
        if (err) throw err;
 
        for (var i = 0; i < res.length; i++) {
+           // Inquirer takes VALUE as the identifier (and value attached to the choice), and NAME as the value to display as a choice
            var x = {value: res[i].id, name: res[i].name}
            array.push(x)  
        }
@@ -211,14 +221,13 @@ const cTable = require('console.table');
 
 
  // Function to add a Employee
- function addEmployee() {
+ async function addEmployee() {
 
    var query = `SELECT * FROM role`
    var roles = []
 
-   connection.query(query, function(err, res) {
-     if (err) throw err;
-
+   var execute = util.promisify(connection.query).bind(connection);
+   await execute(query).then(res => {
      for (var i = 0; i < res.length; i++) {
          var x = {value: res[i].id, name: res[i].title}
          roles.push(x)  
@@ -228,13 +237,12 @@ const cTable = require('console.table');
    var query = `SELECT * FROM employee WHERE manager_id = 0`
    var managers = []
 
-   connection.query(query, function(err, res) {
-     if (err) throw err;
-
-     for (var i = 0; i < res.length; i++) {
-       var x = {value: res[i].id, firstName: res[i].first_name, lastName: res[i].last_name}
-       managers.push(x)
-     }
+   await execute(query).then(res => {
+    managers = res.map(manager => {
+      return ({value: manager.id, name: `${manager.first_name} ${manager.last_name}`});
+    })
+    // console.log("res", res)
+    // console.log("managers", managers)
    })
 
  inquirer
@@ -262,6 +270,7 @@ const cTable = require('console.table');
      choices: managers
    }
  ]).then(function(answer) {
+     // var query = `SELECT employee_id FROM employee WHERE manager'
    var query = `INSERT INTO employee (first_name, last_name, role_id, manager_id)
                 VALUES ("${answer.eFirstName}","${answer.eLastName}","${answer.eRole}","${answer.eManager}")`
 
@@ -272,3 +281,141 @@ const cTable = require('console.table');
    menu();
  })
  }
+ // Function Ask about adding a Department, Role, or Employee
+ function viewDRE() {
+    inquirer
+      .prompt({
+        name: "viewDREMenu",
+        type: "list",
+        message: "What would you like to do?",
+        choices: [
+          "See all departments",
+          "See all roles",
+          "See all employees",
+          "Back"
+        ]
+      })
+      .then(function(answer) {
+        switch (answer.viewDREMenu) {
+        case "See all departments":
+          viewDepartment();
+          break;
+ 
+        case "See all roles":
+          viewRole();
+          break;
+ 
+        case "See all employees":
+          viewEmployee();
+          break;
+ 
+        case "Back":
+          menu();
+          break;
+        }
+      });
+  }
+ 
+ 
+  function viewDepartment() {
+    var query =   `SELECT * FROM department`
+    var departments = []
+ 
+    connection.query(query, function(err, res) {
+        if (err) throw err;
+ 
+        for (var i = 0; i < res.length; i++) {
+            var x = [res[i].id, res[i].name]
+            departments.push(x)
+        }
+        console.table(["Department ID", "Department Name"], departments);
+        menu();
+    })
+ 
+  }
+ 
+  function viewRole() {
+    var query =   `SELECT * FROM role`
+    var roles = []
+ 
+    connection.query(query, function(err, res) {
+        if (err) throw err;
+ 
+        for (var i = 0; i < res.length; i++) {
+            var x = [res[i].id, res[i].title, res[i].salary]
+            roles.push(x)
+        }
+        console.table(["Role ID", "Title", "Salary"], roles);
+        menu();
+    })
+ 
+  }
+ 
+  function viewEmployee() {
+    var query =   `SELECT * FROM employee`
+    var employees = []
+ 
+    connection.query(query, function(err, res) {
+        if (err) throw err;
+ 
+        for (var i = 0; i < res.length; i++) {
+            var x = [res[i].id, res[i].first_name, res[i].last_name]
+            employees.push(x)
+        }
+        console.table(["Employee ID", "First Name", "Last Name"], employees);
+        menu();
+    })
+ 
+  }
+ 
+ 
+ 
+  // Function to Change and Employee Role
+  async function updateRole() {
+ 
+    var query = `SELECT * FROM role`
+    var roles = []
+ 
+    var execute = util.promisify(connection.query).bind(connection);
+ 
+    await execute(query).then(res => {
+      for (var i = 0; i < res.length; i++) {
+        var x = {value: res[i].id, name: res[i].title}
+        roles.push(x)  
+    }
+    })
+ 
+    var query = `SELECT * FROM employee`
+    var employees = []
+ 
+    await execute(query).then(res => {
+      employees = res.map(ee => {
+        return ({value: ee.id, name: `${ee.first_name} ${ee.last_name}`});
+      })
+      // console.log("res", res)
+      // console.log("managers", managers)
+    })
+  inquirer
+  .prompt([
+    {
+      name: "chooseEE",
+      type: "list",
+      message: "Select the employee who needs their role updated.",
+      choices: employees
+    },
+    {
+      name: "newRole",
+      type: "list",
+      message: "What should their new role be?",
+      choices: roles
+    },
+  ]).then(function(answer) {
+    var query = `UPDATE employee SET role_id = ${answer.newRole} WHERE id = ${answer.chooseEE}`
+ 
+    connection.query(query, function(err, res) {
+        if (err) throw err;
+    })
+    console.log(`The role has been updated.`);
+    menu();
+  })
+  }
