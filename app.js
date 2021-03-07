@@ -14,7 +14,7 @@ const cTable = require('console.table');
    user: "root",
 
    // Your password
-   password: "1234",
+   password: "root",
    database: "employeeManager_db"
  });
 
@@ -28,7 +28,7 @@ const cTable = require('console.table');
 }, 1000);
 
  // Function to Make Large Font Title in CMD Line  
- figlet('\ Employee Management System /', function(err, data) {
+ figlet(' Management System ', function(err, data) {
      if (err) {
          console.log('Something went wrong...');
          console.dir(err);
@@ -72,7 +72,7 @@ const cTable = require('console.table');
            break;
 
          case "Exit":
-            figlet('\ Have A Wonderful Day /', function(err, data) {
+            figlet(' Have A Wonderful Day ', function(err, data) {
                 if (err) {
                     console.log('Something went wrong...');
                     console.dir(err);
